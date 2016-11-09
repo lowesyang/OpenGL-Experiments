@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <gl/glut.h>
+#include <stdio.h>
 #define PI 3.141593
 
 float fTranslate;
@@ -73,7 +74,7 @@ void updateView(int width, int height)
 
 	if (bPersp){
 		//when 'p' operation, hint: use FUNCTION gluPerspective
-		gluPerspective(30.0f, whRatio,0.1f, 10.0f);
+		gluPerspective(30.0f, whRatio,0.1f, 100.0f);
 	}
 	else
 		glOrtho(-3, 3, -3, 3, -100, 100);
@@ -108,8 +109,11 @@ float ver_angle = 0, hori_angle = 0;	//the angle of the line of basic point and 
 
 float cameraAngle = 0;					//the angle of camera self rotation
 
+float offsetX = 0, offsetY = 0;			//the carema's offset of x and y
+
 void key(unsigned char k, int x, int y)
 {
+	
 	switch (k)
 	{
 	case 27:
@@ -172,11 +176,38 @@ void key(unsigned char k, int x, int y)
 				  deltaDeg+=5;
 				  break;
 	}
+
+	case 't':{//up
+				 offsetY += 0.1;
+				 break;
+	}
+	case 'g':{//down
+				 offsetY -= 0.1;
+				 break;
+	}
+	case 'f':{//left
+				 offsetX -= 0.1;
+				 break;
+	}
+	case 'h':{//right
+				 offsetX += 0.1;
+				 break;
 	}
 
+	case 'v':{//get closed
+				 distance -= 0.2;
+				 break;
+	}
+	case 'n':{//far awayn
+				 distance += 0.2;
+				 break;
+	}
+	}
+
+	
 	//recompute the position of camera
-	eye[0] = distance*cos(ver_angle * PI / 180)*sin(hori_angle * PI / 180);
-	eye[1] = distance*sin(ver_angle * PI / 180);
+	eye[0] = offsetX + distance*cos(ver_angle * PI / 180)*sin(hori_angle * PI / 180);
+	eye[1] = offsetY+ distance*sin(ver_angle * PI / 180);
 	eye[2] = distance*cos(ver_angle * PI / 180)*cos(hori_angle * PI / 180);
 
 }
@@ -191,7 +222,7 @@ void redraw()
 	glRotatef(cameraAngle, 0.0, 1.0f, 0.0);				//the direction of "look at" rotate	
 
 	gluLookAt(eye[0], eye[1], eye[2],
-		center[0], center[1], center[2],
+		offsetX+center[0], offsetY+center[1], center[2],
 		0, 1, 0);				// 场景（0，0，0）的视点中心 快门法向为Y轴向上
 
 	if (bWire) {

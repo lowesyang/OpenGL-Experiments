@@ -31,34 +31,70 @@ void DrawTable()
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(tableLen*3/5, 1.7, tableWid*3/5);
+	glTranslatef(tableLen*3/5, 2, tableWid*3/5);
 	glScalef(0.7, 3, 0.7);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(-tableLen * 3 / 5, 1.7, -tableWid * 3 / 5);
+	glTranslatef(-tableLen * 3 / 5, 2, -tableWid * 3 / 5);
 	glScalef(0.7, 3, 0.7);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(tableLen * 3 / 5, 1.7, -tableWid * 3 / 5);
+	glTranslatef(tableLen * 3 / 5, 2, -tableWid * 3 / 5);
 	glScalef(0.7, 3, 0.7);
 	glutSolidCube(1.0);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(-tableLen * 3 / 5, 1.7, tableWid * 3 / 5);
+	glTranslatef(-tableLen * 3 / 5, 2, tableWid * 3 / 5);
 	glScalef(0.7, 3, 0.7);
 	glutSolidCube(1.0);
 	glPopMatrix();
+}
+
+//draw list of bunny
+void DrawBunnyList(){
+	int i;
+	int row, col;					//max number in row and column
+	int isDraw = 0;					//the number of bunnies have been drawed
+	row = 2 * tableLen / 1.6;
+	col = 2 * tableWid / 0.9 - 1;
+
+	if (row * col < bunnyNum){
+		tableLen += 1.5;
+		tableWid += 1.0;
+		row = 2 * tableLen / 1.6;
+		col = 2 * tableWid / 0.9 - 1;
+	}
+
+	GLfloat initX = ((row - 1)*spaceX) / 2 - 1.5;		//the initial x of the first bunny
+	GLfloat initZ = ((col - 1)*spaceZ + 0.6) / 2 - 0.36;	//the initial z of the first bunny
+	GLfloat x = initX;
+
+	for (i = 0; i < bunnyNum; i++){
+		DrawBunny(x, initZ);
+		x -= spaceX;
+		isDraw++;
+		if (isDraw % row == 0){
+			x = initX;
+			initZ -= spaceZ;
+		}
+	}
 }
 
 GLint GenTableList()
 {
 	GLint lid = glGenLists(1);
 	glNewList(lid, GL_COMPILE);
+
+	glPushMatrix();
+	glTranslatef(1.5, 4.5, 0);
+	glScalef(2, 2, 2);
+	DrawBunnyList();
+	glPopMatrix();
 
 	DrawTable();
 
@@ -71,32 +107,6 @@ void Draw_Table_List()
 	glCallList(tableList);
 }
 
-//draw list of bunny
-void DrawBunnyList(){
-	int i;
-	int row, col;					//max number in row and column
-	int isDraw = 0;					//the number of bunnies have been drawed
-	row = 2 * tableLen / 1.6;		
-	col = 2 * tableWid / 0.9 - 1;
-	
-	GLfloat initX = ((row - 1)*spaceX) / 2 - 1.5;		//the initial x of the first bunny
-	GLfloat initZ = ((col - 1)*spaceZ + 0.6) / 2 - 0.36;	//the initial z of the first bunny
-	GLfloat x = initX;
-	if (row * col < bunnyNum){
-		tableLen += 1.5;
-		tableWid += 1.0;
-		return;
-	}
-	for (i = 0; i < bunnyNum; i++){
-		DrawBunny(x, initZ);
-		x -= spaceX;
-		isDraw++;
-		if (isDraw % row == 0){
-			x = initX;
-			initZ -= spaceZ;
-		}
-	}
-}
 
 void DrawScene()
 {
@@ -187,12 +197,16 @@ void key(unsigned char k, int x, int y)
 	case 'i':	//add bunny
 	{	
 				bunnyNum++;
+				glDeleteLists(tableList, 1);
+				tableList = GenTableList();			//redraw display list
 				break;
 	}
 	case 'k':	//sub bunny
 	{
 				bunnyNum--;
 				if (bunnyNum < 0) bunnyNum = 0;
+				glDeleteLists(tableList, 1);
+				tableList = GenTableList();			//redraw display list
 				break;
 	}
 	default: break;
@@ -251,8 +265,8 @@ void redraw()
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
-	GLfloat gray[] = { 0.4, 0.4, 0.4, 1.0 };
-	GLfloat light_pos[] = { 10, 10, 10, 1 };
+	GLfloat gray[] = { 0.4, 0.4, 0.2, 1.0 };
+	GLfloat light_pos[] = { 10, 80, 10, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, gray);
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, gray);
